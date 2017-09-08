@@ -23,8 +23,8 @@ from os import path
 from os import walk
 
 from PyQt5 import QtCore
-from PyQt5 import QtGui
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QKeySequence
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtWidgets import QFileDialog, QHBoxLayout, QLabel
 from PyQt5.QtWidgets import QPushButton
@@ -32,7 +32,7 @@ from PyQt5.QtWidgets import QShortcut
 from PyQt5.QtWidgets import QVBoxLayout
 from PyQt5.QtWidgets import QWidget
 
-from binder import Binder
+from binder import FileBinder
 
 
 class MainWindow(QWidget):
@@ -43,34 +43,41 @@ class MainWindow(QWidget):
         super().__init__()
         self.layout = QHBoxLayout()
         self.buttons_layout = QVBoxLayout()
-        self.open_folder_button = QPushButton(_("Open images folder"))
+        self.open_folder_btn = QPushButton(_("Open images folder"))
+        self.archive_btn = QPushButton(_("Create archive"))
         self.image_widget = QLabel()
         self.image_dir = None
         self.img_queue = None
         self.current_img_path = None
 
-        self.binder = Binder(self.NB_IMG_CATEGORIES)
+        self.binder = FileBinder(self.NB_IMG_CATEGORIES)
         self.init_ui()
 
     def init_ui(self):
         self.setWindowTitle(_('Image classifier'))
-        self.buttons_layout.addWidget(self.open_folder_button)
+        self.buttons_layout.addWidget(self.open_folder_btn)
+        self.buttons_layout.addWidget(self.archive_btn)
         self.layout.addWidget(self.image_widget)
         self.layout.addLayout(self.buttons_layout)
 
         # Add Categories buttons
         for i in range(0, self.NB_IMG_CATEGORIES):
             button = QPushButton(str(i))
-            button.shortcut = QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_1 + i), self)
+            button.shortcut = QShortcut(QKeySequence(QtCore.Qt.Key_1 + i), self)
             button.clicked.connect(partial(self.classify_image, i))
             button.shortcut.activated.connect(partial(self.classify_image, i))
             self.buttons_layout.addWidget(button)
 
-        self.open_folder_button.clicked.connect(self.select_img_folder)
+        self.open_folder_btn.clicked.connect(self.select_img_folder)
+        self.archive_btn.clicked.connect(self.save_as_archive)
 
         self.setLayout(self.layout)
         self.showMaximized()
         self.show()
+
+    def save_as_archive(self):
+        dest_file_path = QFileDialog.getSaveFileName(self)[0]
+        self.binder.to_archive(dest_file_path)
 
     def select_img_folder(self):
         self.image_dir = str(QFileDialog.getExistingDirectory(parent=None, caption=_('Select a folder:'),
