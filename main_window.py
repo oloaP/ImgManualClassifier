@@ -18,19 +18,26 @@
 #   You should have received a copy of the GNU General Public License
 #   along with ImgClassifier. If not, see <http://www.gnu.org/licenses/>.
 #
+from functools import partial
+from os import path
 from os import walk
 
+from PyQt5 import QtCore
+from PyQt5 import QtGui
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QFileDialog
-from PyQt5.QtWidgets import QHBoxLayout, QLabel
+from PyQt5.QtWidgets import QFileDialog, QHBoxLayout, QLabel
 from PyQt5.QtWidgets import QPushButton
+from PyQt5.QtWidgets import QShortcut
 from PyQt5.QtWidgets import QVBoxLayout
 from PyQt5.QtWidgets import QWidget
-from os import path
+
+from binder import Binder
 
 
 class MainWindow(QWidget):
+
+    NB_IMG_CATEGORIES = 7
 
     def __init__(self):
         super().__init__()
@@ -42,6 +49,7 @@ class MainWindow(QWidget):
         self.img_queue = None
         self.current_img_path = None
 
+        self.binder = Binder(self.NB_IMG_CATEGORIES)
         self.init_ui()
 
     def init_ui(self):
@@ -49,6 +57,14 @@ class MainWindow(QWidget):
         self.buttons_layout.addWidget(self.open_folder_button)
         self.layout.addWidget(self.image_widget)
         self.layout.addLayout(self.buttons_layout)
+
+        # Add Categories buttons
+        for i in range(0, self.NB_IMG_CATEGORIES):
+            button = QPushButton(str(i))
+            button.shortcut = QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_1 + i), self)
+            button.clicked.connect(partial(self.classify_image, i))
+            button.shortcut.activated.connect(partial(self.classify_image, i))
+            self.buttons_layout.addWidget(button)
 
         self.open_folder_button.clicked.connect(self.select_img_folder)
 
@@ -62,6 +78,10 @@ class MainWindow(QWidget):
         if self.image_dir:
             self.img_queue = self._walk_dir(self.image_dir)
             self.next_image()
+
+    def classify_image(self, category):
+        self.binder.classify(self.current_img_path, category)
+        self.next_image()
 
     def next_image(self):
         self.current_img_path = next(self.img_queue)
