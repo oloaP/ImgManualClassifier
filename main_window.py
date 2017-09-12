@@ -87,14 +87,18 @@ class MainWindow(QWidget):
             self.next_image()
 
     def classify_image(self, category):
-        self.binder.classify(self.current_img_path, category)
-        self.next_image()
+        if self.current_img_path is not None:
+            self.binder.classify(self.current_img_path, category)
+            self.next_image()
 
     def next_image(self):
-        self.current_img_path = next(self.img_queue)
-        self.image_widget.setPixmap(QPixmap(self.current_img_path).scaled(
-            self.image_widget.width(), self.image_widget.height(),
-            Qt.KeepAspectRatio))
+        self.current_img_path = next(self.img_queue, None)
+        if self.current_img_path is None:
+            self.image_widget.clear()
+        else:
+            self.image_widget.setPixmap(QPixmap(self.current_img_path).scaled(
+                self.image_widget.width(), self.image_widget.height(),
+                Qt.KeepAspectRatio))
 
     @staticmethod
     def _walk_dir(dir_):
