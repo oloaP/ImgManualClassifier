@@ -45,6 +45,7 @@ class MainWindow(QWidget):
         self.buttons_layout = QVBoxLayout()
         self.open_folder_btn = QPushButton(_("Open images folder"))
         self.archive_btn = QPushButton(_("Create archive"))
+        self.cancel_last_btn = QPushButton(_("Cancel last"))
         self.image_widget = QLabel()
         self.image_dir = None
         self.img_queue = None
@@ -57,6 +58,8 @@ class MainWindow(QWidget):
         self.setWindowTitle(_('Image classifier'))
         self.buttons_layout.addWidget(self.open_folder_btn)
         self.buttons_layout.addWidget(self.archive_btn)
+        self.buttons_layout.addWidget(self.cancel_last_btn)
+
         self.layout.addWidget(self.image_widget)
         self.layout.addLayout(self.buttons_layout)
 
@@ -70,6 +73,7 @@ class MainWindow(QWidget):
 
         self.open_folder_btn.clicked.connect(self.select_img_folder)
         self.archive_btn.clicked.connect(self.save_as_archive)
+        self.cancel_last_btn.clicked.connect(self.cancel_last_classification)
 
         self.setLayout(self.layout)
         self.showMaximized()
@@ -99,6 +103,9 @@ class MainWindow(QWidget):
             self.image_widget.setPixmap(QPixmap(self.current_img_path).scaled(
                 self.image_widget.width(), self.image_widget.height(),
                 Qt.KeepAspectRatio))
+
+    def cancel_last_classification(self):
+        self.binder.remove_last()
 
     @staticmethod
     def _walk_dir(dir_):

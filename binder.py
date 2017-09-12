@@ -34,6 +34,10 @@ class Binder(object):
         self.binder_dict[category].append(obj)
         self.history.append((category, obj))
 
+    def remove_last(self):
+        category, obj = self.history.pop()
+        self.binder_dict[category].remove(obj)
+
 
 class FileBinder(Binder):
     def to_archive(self, dest_path):
