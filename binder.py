@@ -28,9 +28,11 @@ import shutil
 class Binder(object):
     def __init__(self, nb_tabs: int):
         self.binder_dict = {x: list() for x in range(0, nb_tabs)}
+        self.history = []
 
     def classify(self, obj, category):
         self.binder_dict[category].append(obj)
+        self.history.append((category, obj))
 
 
 class FileBinder(Binder):
