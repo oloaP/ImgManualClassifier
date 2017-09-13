@@ -36,23 +36,29 @@ from binder import FileBinder
 
 
 class MainWindow(QWidget):
+    # TODO user Customizable
     NB_IMG_CATEGORIES = 7
 
     def __init__(self):
         super().__init__()
+
+        # UI elements
         self.layout = QHBoxLayout()
         self.buttons_layout = QVBoxLayout()
         self.open_folder_btn = QPushButton(_("Open images folder"))
         self.archive_btn = QPushButton(_("Create archive"))
         self.cancel_last_btn = QPushButton(_("Cancel last"))
+
         self.image_widget = QLabel()
         self.image_path_widget = QLabel()
+
+        # Back-end facilities
         self.image_dir = None
         self.img_queue = None
         self.img_waiting_list = []
         self.current_img_path = None
-
         self.binder = FileBinder(self.NB_IMG_CATEGORIES)
+
         self.init_ui()
 
     def init_ui(self):
@@ -85,10 +91,12 @@ class MainWindow(QWidget):
         self.show()
 
     def save_as_archive(self):
+        """Build an archive of files classified in the binder"""
         dest_file_path = QFileDialog.getSaveFileName(self)[0]
         self.binder.to_archive(dest_file_path)
 
     def select_img_folder(self):
+        """Select an image folder to be displayed and organized"""
         self.image_dir = str(QFileDialog.getExistingDirectory(parent=None, caption=_('Select a folder:'),
                                                               options=QFileDialog.ShowDirsOnly))
         if self.image_dir:
@@ -96,14 +104,18 @@ class MainWindow(QWidget):
             self.next_image()
 
     def classify_image(self, category):
+        """Classify the current image in the given category"""
         if self.current_img_path is not None:
             self.binder.classify(self.current_img_path, category)
             self.next_image()
 
     def next_image(self):
+        """Display the next image in queue"""
+        # Previously canceled images are stored in a waiting list
         if self.img_waiting_list:
             self._set_image(self.img_waiting_list.pop())
         else:
+            # Fetch the next image from the queue and display it if there is one
             image_path = next(self.img_queue, None)
             if image_path is None:
                 self.current_img_path = None
@@ -113,6 +125,7 @@ class MainWindow(QWidget):
                 self._set_image(image_path)
 
     def cancel_last_classification(self):
+        """Remove the last processed image to display it again"""
         _, file_path = self.binder.remove_last()
         self.img_waiting_list.append(self.current_img_path)
         self._set_image(file_path)
