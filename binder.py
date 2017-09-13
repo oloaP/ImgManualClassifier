@@ -37,6 +37,7 @@ class Binder(object):
     def remove_last(self):
         category, obj = self.history.pop()
         self.binder_dict[category].remove(obj)
+        return category, obj
 
 
 class FileBinder(Binder):
