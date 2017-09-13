@@ -75,7 +75,10 @@ class MainWindow(QWidget):
 
         self.open_folder_btn.clicked.connect(self.select_img_folder)
         self.archive_btn.clicked.connect(self.save_as_archive)
+
+        self.cancel_last_btn.shortcut = QShortcut(QKeySequence(QtCore.Qt.Key_Backspace), self)
         self.cancel_last_btn.clicked.connect(self.cancel_last_classification)
+        self.cancel_last_btn.shortcut.activated.connect(self.cancel_last_classification)
 
         self.setLayout(self.layout)
         self.showMaximized()
